@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/book_lists_navigation"
+    app:startDestination="@id/bookLists">
+
+    <fragment
+        android:id="@+id/bookLists"
+        android:name="com.lukasstancikas.booklists.ui.BookListsFragment"
+        tools:layout="@layout/fragment_book_lists"
+        android:label="Book Lists" />
+</navigation>
