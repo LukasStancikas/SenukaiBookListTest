@@ -4,24 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2023-12-13T13:17:05.280067400Z">
+        <DropdownSelection timestamp="2023-12-14T21:35:43.750935600Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Lukas\.android\avd\Pixel_3a_API_34_extension_level_7_x86_64.avd" />
-            </handle>
-          </Target>
-        </DropdownSelection>
-        <DialogSelection />
-      </SelectionState>
-      <SelectionState runConfigName="booklists">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="app.booklists">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2023-12-13T10:30:38.111721200Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Lukas\.android\avd\Pixel_2_API_29.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\lukas\.android\avd\Pixel_6_API_33.avd" />
             </handle>
           </Target>
         </DropdownSelection>

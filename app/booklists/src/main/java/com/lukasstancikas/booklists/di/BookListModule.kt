@@ -1,5 +1,6 @@
 package com.lukasstancikas.booklists.di
 
+import com.lukasstancikas.booklists.ui.bookdetails.BookViewModel
 import com.lukasstancikas.booklists.ui.booklist.MyListViewModel
 import com.lukasstancikas.booklists.ui.booklists.BookListsViewModel
 import com.lukasstancikas.booklists.usecase.PopulatedBookListsUseCase
@@ -14,6 +15,7 @@ object BookListModule {
         factoryOf(::PopulatedMyListUseCase)
         factoryOf(::PopulatedBookListsUseCase)
         viewModelOf(::BookListsViewModel)
+        viewModel { parameters -> BookViewModel(book = parameters.get(), get(), get()) }
         viewModel { parameters -> MyListViewModel(bookList = parameters.get(), get(), get()) }
     }
 }

@@ -45,7 +45,7 @@ class MyListViewModel(
     }
 
     fun onBookClick(book: Book) = viewModelScope.launch {
-        emitNavigation(NavigationIntent.BookSelectedFromLists(book))
+        emitNavigation(NavigationIntent.BookSelectedFromMyList(book))
     }
 
     private fun fetchBooksWithDetails() {

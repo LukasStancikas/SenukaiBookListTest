@@ -20,7 +20,7 @@ class PopulatedBookListsUseCase(private val booksRepository: BooksRepository) {
         books.forEach {
             bookListsContainers[it.listId]?.let { container ->
                 // business requirement to show up to 5 books in a list of lists
-                if (container.bookShowLimitReached()) {
+                if (!container.bookShowLimitReached()) {
                     container.add(it)
                 }
             }
