@@ -1,4 +1,4 @@
-package com.lukasstancikas.booklists.ui
+package com.lukasstancikas.booklists.ui.booklists
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,17 +7,18 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
-
 import com.lukasstancikas.booklists.R
-import com.lukasstancikas.booklists.databinding.FragmentBookListsBinding
+import com.lukasstancikas.booklists.databinding.FragmentListsBinding
+import com.lukasstancikas.booklists.navigator.NavigationIntent
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class BookListsFragment : Fragment(R.layout.fragment_book_lists) {
+class BookListsFragment : Fragment(R.layout.fragment_lists) {
 
-    private var _binding: FragmentBookListsBinding? = null
+    private var _binding: FragmentListsBinding? = null
     private val binding get() = _binding!!
     private val viewModel: BookListsViewModel by viewModel()
     private val adapter by lazy {
@@ -30,7 +31,7 @@ class BookListsFragment : Fragment(R.layout.fragment_book_lists) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentBookListsBinding.inflate(inflater, container, false)
+        _binding = FragmentListsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -52,6 +53,10 @@ class BookListsFragment : Fragment(R.layout.fragment_book_lists) {
             .flowWithLifecycle(viewLifecycleOwner.lifecycle)
             .onEach(::showError)
             .launchIn(viewLifecycleOwner.lifecycleScope)
+        viewModel.navigationStream
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
+            .onEach(::navigate)
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private fun setupViews() {
@@ -64,14 +69,18 @@ class BookListsFragment : Fragment(R.layout.fragment_book_lists) {
         bookListsSwipeRefresh.isRefreshing = state.isLoading
     }
 
-    private fun showError(error: BookListsUiState.BookListsError) {
+    private fun showError(error: BookListsUiState.Error) {
         context?.let {
             val errorResId = when (error) {
-                BookListsUiState.BookListsError.Cancelled -> R.string.error_cancelled
-                BookListsUiState.BookListsError.FailedToReachServer -> R.string.error_reach_server
+                BookListsUiState.Error.Cancelled -> R.string.error_cancelled
+                BookListsUiState.Error.FailedToReachServer -> R.string.error_reach_server
             }
             Snackbar.make(binding.root, errorResId, Snackbar.LENGTH_SHORT).show()
         }
+    }
+
+    private fun navigate(intent: NavigationIntent) {
+        intent.navigate(findNavController())
     }
 
 }

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/avatar_card_view"
+    style="@style/BookListItemCardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/item_book_list_padding"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:dividerPadding="@dimen/item_book_list_padding"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/itemBookImage"
+            android:layout_width="@dimen/item_book_image_size"
+            android:layout_height="@dimen/item_book_image_size"
+            android:layout_margin="@dimen/item_book_list_padding"
+            android:contentDescription="@string/content_description_book_item_image"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/itemBookTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/item_book_list_padding"
+            android:layout_marginEnd="@dimen/item_book_list_padding"
+            android:layout_marginBottom="@dimen/item_book_list_padding"
+            android:textSize="@dimen/book_list_title_size"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/itemBookImage"
+            app:layout_constraintTop_toTopOf="@+id/itemBookImage"
+            tools:text="Star Wars" />
+
+        <ProgressBar
+            android:id="@+id/itemBookProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/item_book_list_padding"
+            app:layout_constraintStart_toEndOf="@+id/itemBookImage"
+            app:layout_constraintTop_toBottomOf="@+id/itemBookTitle" />
+
+        <TextView
+            android:id="@+id/itemBookAuthor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/item_book_list_padding"
+            android:layout_marginTop="@dimen/item_book_list_padding"
+            android:layout_marginEnd="@dimen/item_book_list_padding"
+            android:textSize="@dimen/book_list_title_size"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/itemBookImage"
+            app:layout_constraintTop_toBottomOf="@+id/itemBookTitle"
+            tools:text="George Lucas" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

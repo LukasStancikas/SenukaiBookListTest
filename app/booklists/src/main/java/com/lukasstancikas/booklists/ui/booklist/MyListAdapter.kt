@@ -1,25 +1,26 @@
-package com.lukasstancikas.booklists.ui
+package com.lukasstancikas.booklists.ui.booklist
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.lukasstancikas.booklists.data.Book
-import com.lukasstancikas.booklists.databinding.ItemBookSmallBinding
+import com.lukasstancikas.booklists.databinding.ItemBookBigBinding
 
-class BookSmallAdapter(private val onBookClick: (Book) -> Unit) :
-    RecyclerView.Adapter<BookSmallAdapter.MyViewHolder>() {
+class MyListAdapter(
+    private val onBookClick: (Book) -> Unit
+) : RecyclerView.Adapter<MyListAdapter.MyViewHolder>() {
     private val items = mutableListOf<Book>()
 
     override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
+        parent: ViewGroup, viewType: Int
     ): MyViewHolder {
         val binding =
-            ItemBookSmallBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            ItemBookBigBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return MyViewHolder(binding)
     }
 
@@ -34,6 +35,8 @@ class BookSmallAdapter(private val onBookClick: (Book) -> Unit) :
             .placeholder(android.R.drawable.progress_indeterminate_horizontal)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(itemBookImage)
+        itemBookAuthor.text = items[position].author
+        itemBookProgress.isVisible = items[position].isLoading
         itemBookTitle.text = items[position].title
         root.setOnClickListener { onBookClick(items[position]) }
     }
@@ -52,8 +55,9 @@ class BookSmallAdapter(private val onBookClick: (Book) -> Unit) :
         }
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            // data class equality check covers all fields
-            return oldItems[oldItemPosition] == newItems[newItemPosition]
+            return oldItems[oldItemPosition].title == newItems[newItemPosition].title
+                    && oldItems[oldItemPosition].author == newItems[newItemPosition].author
+                    && oldItems[oldItemPosition].img == newItems[newItemPosition].img
         }
 
         override fun getOldListSize(): Int {
@@ -65,5 +69,5 @@ class BookSmallAdapter(private val onBookClick: (Book) -> Unit) :
         }
     }
 
-    class MyViewHolder(val binding: ItemBookSmallBinding) : RecyclerView.ViewHolder(binding.root)
+    class MyViewHolder(val binding: ItemBookBigBinding) : RecyclerView.ViewHolder(binding.root)
 }

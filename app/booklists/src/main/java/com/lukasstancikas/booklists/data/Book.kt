@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.lukasstancikas.booklists.util.DateSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.time.LocalDate
 
 @Serializable
@@ -18,4 +19,9 @@ data class Book(
     val isbn: String? = null,
     @Serializable(with = DateSerializer::class)
     val publicationDate: LocalDate? = null,
-): Parcelable
+    @Transient
+    val isLoading: Boolean = false
+) : Parcelable {
+    val isWithoutDetails: Boolean
+        get() = listOf<Any?>(description, author, isbn, publicationDate).all { it == null }
+}

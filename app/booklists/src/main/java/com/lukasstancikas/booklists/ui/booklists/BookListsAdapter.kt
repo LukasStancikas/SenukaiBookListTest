@@ -1,4 +1,4 @@
-package com.lukasstancikas.booklists.ui
+package com.lukasstancikas.booklists.ui.booklists
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

@@ -1,30 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/avatar_card_view"
-    android:layout_margin="@dimen/item_book_list_padding"
-    android:foreground="?android:attr/selectableItemBackground"
-    android:clickable="true"
     style="@style/BookListItemCardView"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/item_book_list_padding"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
+        android:layout_height="wrap_content"
         android:dividerPadding="@dimen/item_book_list_padding"
-        android:layout_height="wrap_content">
+        android:gravity="center"
+        android:orientation="vertical">
 
         <ImageView
             android:id="@+id/itemBookImage"
-            android:scaleType="centerCrop"
-            android:layout_margin="@dimen/item_book_list_padding"
             android:layout_width="@dimen/item_book_image_size"
             android:layout_height="@dimen/item_book_image_size"
-            android:contentDescription="@string/content_description_book_item_image" />
+            android:layout_margin="@dimen/item_book_list_padding"
+            android:contentDescription="@string/content_description_book_item_image"
+            android:scaleType="centerCrop" />
 
         <TextView
             android:id="@+id/itemBookTitle"
@@ -35,11 +33,6 @@
             android:layout_marginBottom="@dimen/item_book_list_padding"
             android:textSize="@dimen/book_list_title_size"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/itemBookListAll"
-            app:layout_constraintEnd_toStartOf="@+id/itemBookListAll"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/itemBookListAll"
             tools:text="Star Wars" />
     </LinearLayout>
 

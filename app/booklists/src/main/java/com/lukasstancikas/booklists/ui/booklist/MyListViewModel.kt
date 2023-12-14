@@ -1,11 +1,11 @@
-package com.lukasstancikas.booklists.ui
+package com.lukasstancikas.booklists.ui.booklist
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lukasstancikas.booklists.data.Book
 import com.lukasstancikas.booklists.data.BookList
-import com.lukasstancikas.booklists.usecase.PopulatedBookListsUseCase
+import com.lukasstancikas.booklists.usecase.PopulatedMyListUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
@@ -14,16 +14,17 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class BookListsViewModel(
+class MyListViewModel(
+    bookList: BookList,
     private val savedStateHandle: SavedStateHandle,
-    private val booksListUseCase: PopulatedBookListsUseCase
+    private val myListUseCase: PopulatedMyListUseCase
 ) : ViewModel() {
 
-    val uiState: StateFlow<BookListsUiState> =
-        savedStateHandle.getStateFlow(STATE_KEY, BookListsUiState())
+    val uiState: StateFlow<MyListUiState> =
+        savedStateHandle.getStateFlow(STATE_KEY, MyListUiState(bookList = bookList))
 
-    private val _errorStream = MutableSharedFlow<BookListsUiState.BookListsError>()
-    val errorStream: SharedFlow<BookListsUiState.BookListsError> = _errorStream
+    private val _errorStream = MutableSharedFlow<MyListUiState.Error>()
+    val errorStream: SharedFlow<MyListUiState.Error> = _errorStream
 
     private var fetchJob: Job? = null
 
@@ -33,7 +34,7 @@ class BookListsViewModel(
         updateUiState { it.copy(isLoading = false) }
 
         when (throwable) {
-            is CancellationException -> BookListsUiState.BookListsError.Cancelled
+            is CancellationException -> MyListUiState.Error.Cancelled
             else -> null
         }?.let { error -> _errorStream.tryEmit(error) }
 
@@ -44,29 +45,25 @@ class BookListsViewModel(
     }
 
     fun onPullRefresh() {
-        fetchBookLists()
-    }
-
-    fun onAllClick(bookList: BookList) {
-
+        fetchBooksWithDetails()
     }
 
     fun onBookClick(book: Book) {
 
     }
 
-    private fun fetchBookLists() {
+    private fun fetchBooksWithDetails() {
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch(exceptionHandler) {
             updateUiState { it.copy(isLoading = true) }
-            booksListUseCase().collect { data ->
-                updateUiState { it.copy(bookLists = data) }
+            myListUseCase(uiState.value.bookList).collect { data ->
+                updateUiState { it.copy(bookList = data) }
             }
             updateUiState { it.copy(isLoading = false) }
         }
     }
 
-    private fun updateUiState(reduce: (BookListsUiState) -> BookListsUiState) {
+    private fun updateUiState(reduce: (MyListUiState) -> MyListUiState) {
         savedStateHandle[STATE_KEY] = reduce(uiState.value)
     }
 

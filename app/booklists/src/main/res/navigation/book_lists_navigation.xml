@@ -7,7 +7,25 @@
 
     <fragment
         android:id="@+id/bookLists"
-        android:name="com.lukasstancikas.booklists.ui.BookListsFragment"
-        tools:layout="@layout/fragment_book_lists"
-        android:label="Book Lists" />
+        android:name="com.lukasstancikas.booklists.ui.booklists.BookListsFragment"
+        android:label="Book Lists"
+        tools:layout="@layout/fragment_lists">
+        <action
+            android:id="@+id/action_bookLists_to_myList"
+            app:destination="@id/myList"
+            app:enterAnim="@anim/nav_slide_in_right"
+            app:exitAnim="@anim/nav_slide_out_left"
+            app:popEnterAnim="@anim/nav_slide_in_left"
+            app:popExitAnim="@anim/nav_slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/myList"
+        android:name="com.lukasstancikas.booklists.ui.booklist.MyListFragment"
+        android:label="MyList"
+        tools:layout="@layout/fragment_my_list" >
+        <argument
+            android:name="bookList"
+            app:argType="com.lukasstancikas.booklists.data.BookList" />
+    </fragment>
 </navigation>

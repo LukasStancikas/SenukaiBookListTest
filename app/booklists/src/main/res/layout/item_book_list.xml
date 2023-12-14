@@ -5,9 +5,9 @@
     android:id="@+id/avatar_card_view"
     style="@style/BookListItemCardView"
     android:layout_width="match_parent"
-    android:animateLayoutChanges="true"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/item_book_list_padding">
+    android:layout_margin="@dimen/item_book_list_padding"
+    android:animateLayoutChanges="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
