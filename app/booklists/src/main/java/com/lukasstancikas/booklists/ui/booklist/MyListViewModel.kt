@@ -7,29 +7,21 @@ import com.lukasstancikas.booklists.data.Book
 import com.lukasstancikas.booklists.data.BookList
 import com.lukasstancikas.booklists.data.NetworkError
 import com.lukasstancikas.booklists.navigator.NavigationIntent
+import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreams
+import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreamsHandler
 import com.lukasstancikas.booklists.usecase.PopulatedMyListUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MyListViewModel(
     bookList: BookList,
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val myListUseCase: PopulatedMyListUseCase
-) : ViewModel() {
-
-    val uiState: StateFlow<MyListUiState> =
-        savedStateHandle.getStateFlow(STATE_KEY, MyListUiState(bookList = bookList))
-
-    private val _errorStream = MutableSharedFlow<NetworkError>()
-    val errorStream: SharedFlow<NetworkError> = _errorStream
-
-    private val _navigationStream = MutableSharedFlow<NavigationIntent>()
-    val navigationStream: SharedFlow<NavigationIntent> = _navigationStream
+) : ViewModel(),
+    ViewModelCommonStreams<MyListUiState>
+    by ViewModelCommonStreamsHandler(savedStateHandle, MyListUiState(bookList = bookList)) {
 
     private var fetchJob: Job? = null
 
@@ -41,7 +33,7 @@ class MyListViewModel(
         when (throwable) {
             is CancellationException -> NetworkError.Cancelled
             else -> null
-        }?.let { error -> viewModelScope.launch { _errorStream.emit(error) } }
+        }?.let { error -> viewModelScope.launch { emitError(error) } }
     }
 
     init {
@@ -53,7 +45,7 @@ class MyListViewModel(
     }
 
     fun onBookClick(book: Book) = viewModelScope.launch {
-        _navigationStream.emit(NavigationIntent.BookSelectedFromLists(book))
+        emitNavigation(NavigationIntent.BookSelectedFromLists(book))
     }
 
     private fun fetchBooksWithDetails() {
@@ -65,13 +57,5 @@ class MyListViewModel(
             }
             updateUiState { it.copy(isLoading = false) }
         }
-    }
-
-    private fun updateUiState(reduce: (MyListUiState) -> MyListUiState) {
-        savedStateHandle[STATE_KEY] = reduce(uiState.value)
-    }
-
-    companion object {
-        const val STATE_KEY = "book_lists_save_state"
     }
 }

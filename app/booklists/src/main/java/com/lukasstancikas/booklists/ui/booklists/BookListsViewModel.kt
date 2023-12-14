@@ -6,31 +6,22 @@ import androidx.lifecycle.viewModelScope
 import com.lukasstancikas.booklists.data.Book
 import com.lukasstancikas.booklists.data.BookList
 import com.lukasstancikas.booklists.data.NetworkError
-import com.lukasstancikas.booklists.navigator.NavigationIntent
 import com.lukasstancikas.booklists.navigator.NavigationIntent.BookListSelected
 import com.lukasstancikas.booklists.navigator.NavigationIntent.BookSelectedFromLists
+import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreams
+import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreamsHandler
 import com.lukasstancikas.booklists.usecase.PopulatedBookListsUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class BookListsViewModel(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val booksListUseCase: PopulatedBookListsUseCase
-) : ViewModel() {
-
-    val uiState: StateFlow<BookListsUiState> =
-        savedStateHandle.getStateFlow(STATE_KEY, BookListsUiState())
-
-    private val _errorStream = MutableSharedFlow<NetworkError>()
-    val errorStream: SharedFlow<NetworkError> = _errorStream
-
-    private val _navigationStream = MutableSharedFlow<NavigationIntent>()
-    val navigationStream: SharedFlow<NavigationIntent> = _navigationStream
+) : ViewModel(),
+    ViewModelCommonStreams<BookListsUiState>
+    by ViewModelCommonStreamsHandler(savedStateHandle, BookListsUiState()) {
 
     private var fetchJob: Job? = null
 
@@ -42,7 +33,7 @@ class BookListsViewModel(
         when (throwable) {
             is CancellationException -> NetworkError.Cancelled
             else -> null
-        }?.let { error -> viewModelScope.launch { _errorStream.emit(error) } }
+        }?.let { error -> viewModelScope.launch { emitError(error) } }
 
     }
 
@@ -55,11 +46,11 @@ class BookListsViewModel(
     }
 
     fun onAllClick(bookList: BookList) = viewModelScope.launch {
-        _navigationStream.emit(BookListSelected(bookList))
+        emitNavigation(BookListSelected(bookList))
     }
 
     fun onBookClick(book: Book) = viewModelScope.launch {
-        _navigationStream.emit(BookSelectedFromLists(book))
+        emitNavigation(BookSelectedFromLists(book))
     }
 
     private fun fetchBookLists() {
@@ -71,13 +62,5 @@ class BookListsViewModel(
             }
             updateUiState { it.copy(isLoading = false) }
         }
-    }
-
-    private fun updateUiState(reduce: (BookListsUiState) -> BookListsUiState) {
-        savedStateHandle[STATE_KEY] = reduce(uiState.value)
-    }
-
-    companion object {
-        const val STATE_KEY = "book_lists_save_state"
     }
 }

@@ -6,25 +6,20 @@ import androidx.lifecycle.viewModelScope
 import com.lukasstancikas.booklists.data.Book
 import com.lukasstancikas.booklists.data.NetworkError
 import com.lukasstancikas.booklists.network.BooksRepository
+import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreams
+import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreamsHandler
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class BookViewModel(
     book: Book,
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val booksRepository: BooksRepository
-) : ViewModel() {
-
-    val uiState: StateFlow<BookDetailsUiState> =
-        savedStateHandle.getStateFlow(STATE_KEY, BookDetailsUiState(book = book))
-
-    private val _errorStream = MutableSharedFlow<NetworkError>()
-    val errorStream: SharedFlow<NetworkError> = _errorStream
+) : ViewModel(),
+    ViewModelCommonStreams<BookDetailsUiState>
+    by ViewModelCommonStreamsHandler(savedStateHandle, BookDetailsUiState(book = book)) {
 
     private var fetchJob: Job? = null
 
@@ -36,7 +31,7 @@ class BookViewModel(
         when (throwable) {
             is CancellationException -> NetworkError.Cancelled
             else -> null
-        }?.let { error -> viewModelScope.launch { _errorStream.emit(error) } }
+        }?.let { error -> viewModelScope.launch { emitError(error) } }
     }
 
     init {
@@ -56,13 +51,5 @@ class BookViewModel(
             val bookDetails = booksRepository.getBookDetails(uiState.value.book.id)
             updateUiState { it.copy(book = bookDetails, isLoading = false) }
         }
-    }
-
-    private fun updateUiState(reduce: (BookDetailsUiState) -> BookDetailsUiState) {
-        savedStateHandle[STATE_KEY] = reduce(uiState.value)
-    }
-
-    companion object {
-        const val STATE_KEY = "book_lists_save_state"
     }
 }
