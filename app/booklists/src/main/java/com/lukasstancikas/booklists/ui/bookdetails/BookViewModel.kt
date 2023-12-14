@@ -1,15 +1,11 @@
-package com.lukasstancikas.booklists.ui.booklists
+package com.lukasstancikas.booklists.ui.bookdetails
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lukasstancikas.booklists.data.Book
-import com.lukasstancikas.booklists.data.BookList
 import com.lukasstancikas.booklists.data.NetworkError
-import com.lukasstancikas.booklists.navigator.NavigationIntent
-import com.lukasstancikas.booklists.navigator.NavigationIntent.BookListSelected
-import com.lukasstancikas.booklists.navigator.NavigationIntent.BookSelectedFromLists
-import com.lukasstancikas.booklists.usecase.PopulatedBookListsUseCase
+import com.lukasstancikas.booklists.network.BooksRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
@@ -18,19 +14,17 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class BookListsViewModel(
+class BookViewModel(
+    book: Book,
     private val savedStateHandle: SavedStateHandle,
-    private val booksListUseCase: PopulatedBookListsUseCase
+    private val booksRepository: BooksRepository
 ) : ViewModel() {
 
-    val uiState: StateFlow<BookListsUiState> =
-        savedStateHandle.getStateFlow(STATE_KEY, BookListsUiState())
+    val uiState: StateFlow<BookDetailsUiState> =
+        savedStateHandle.getStateFlow(STATE_KEY, BookDetailsUiState(book = book))
 
     private val _errorStream = MutableSharedFlow<NetworkError>()
     val errorStream: SharedFlow<NetworkError> = _errorStream
-
-    private val _navigationStream = MutableSharedFlow<NavigationIntent>()
-    val navigationStream: SharedFlow<NavigationIntent> = _navigationStream
 
     private var fetchJob: Job? = null
 
@@ -43,37 +37,28 @@ class BookListsViewModel(
             is CancellationException -> NetworkError.Cancelled
             else -> null
         }?.let { error -> viewModelScope.launch { _errorStream.emit(error) } }
-
     }
 
     init {
-        onPullRefresh()
-    }
-
-    fun onPullRefresh() {
-        fetchBookLists()
-    }
-
-    fun onAllClick(bookList: BookList) = viewModelScope.launch {
-        _navigationStream.emit(BookListSelected(bookList))
-    }
-
-    fun onBookClick(book: Book) = viewModelScope.launch {
-        _navigationStream.emit(BookSelectedFromLists(book))
-    }
-
-    private fun fetchBookLists() {
-        fetchJob?.cancel()
-        fetchJob = viewModelScope.launch(exceptionHandler) {
-            updateUiState { it.copy(isLoading = true) }
-            booksListUseCase().collect { data ->
-                updateUiState { it.copy(bookLists = data) }
-            }
-            updateUiState { it.copy(isLoading = false) }
+        if (uiState.value.book.isWithoutDetails) {
+            onPullRefresh()
         }
     }
 
-    private fun updateUiState(reduce: (BookListsUiState) -> BookListsUiState) {
+    fun onPullRefresh() {
+        fetchBookDetails()
+    }
+
+    private fun fetchBookDetails() {
+        fetchJob?.cancel()
+        fetchJob = viewModelScope.launch(exceptionHandler) {
+            updateUiState { it.copy(isLoading = true) }
+            val bookDetails = booksRepository.getBookDetails(uiState.value.book.id)
+            updateUiState { it.copy(book = bookDetails, isLoading = false) }
+        }
+    }
+
+    private fun updateUiState(reduce: (BookDetailsUiState) -> BookDetailsUiState) {
         savedStateHandle[STATE_KEY] = reduce(uiState.value)
     }
 

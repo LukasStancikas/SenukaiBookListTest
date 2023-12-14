@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.lukasstancikas.booklists.R
+import com.lukasstancikas.booklists.data.NetworkError
 import com.lukasstancikas.booklists.databinding.FragmentListsBinding
 import com.lukasstancikas.booklists.navigator.NavigationIntent
 import kotlinx.coroutines.flow.launchIn
@@ -69,11 +70,11 @@ class BookListsFragment : Fragment(R.layout.fragment_lists) {
         bookListsSwipeRefresh.isRefreshing = state.isLoading
     }
 
-    private fun showError(error: BookListsUiState.Error) {
+    private fun showError(error: NetworkError) {
         context?.let {
             val errorResId = when (error) {
-                BookListsUiState.Error.Cancelled -> R.string.error_cancelled
-                BookListsUiState.Error.FailedToReachServer -> R.string.error_reach_server
+                NetworkError.Cancelled -> R.string.error_cancelled
+                NetworkError.FailedToReachServer -> R.string.error_reach_server
             }
             Snackbar.make(binding.root, errorResId, Snackbar.LENGTH_SHORT).show()
         }

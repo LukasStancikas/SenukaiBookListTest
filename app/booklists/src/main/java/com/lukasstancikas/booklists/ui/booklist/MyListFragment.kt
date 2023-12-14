@@ -7,10 +7,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.snackbar.Snackbar
 import com.lukasstancikas.booklists.R
+import com.lukasstancikas.booklists.data.NetworkError
 import com.lukasstancikas.booklists.databinding.FragmentMyListBinding
+import com.lukasstancikas.booklists.navigator.NavigationIntent
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -48,6 +51,10 @@ class MyListFragment : Fragment(R.layout.fragment_my_list) {
             .launchIn(viewLifecycleOwner.lifecycleScope)
         viewModel.errorStream.flowWithLifecycle(viewLifecycleOwner.lifecycle).onEach(::showError)
             .launchIn(viewLifecycleOwner.lifecycleScope)
+        viewModel.navigationStream
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
+            .onEach(::navigate)
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private fun setupViews() {
@@ -60,14 +67,18 @@ class MyListFragment : Fragment(R.layout.fragment_my_list) {
         myListSwipeRefresh.isRefreshing = state.isLoading
     }
 
-    private fun showError(error: MyListUiState.Error) {
+    private fun showError(error: NetworkError) {
         context?.let {
             val errorResId = when (error) {
-                MyListUiState.Error.Cancelled -> R.string.error_cancelled
-                MyListUiState.Error.FailedToReachServer -> R.string.error_reach_server
+                NetworkError.Cancelled -> R.string.error_cancelled
+                NetworkError.FailedToReachServer -> R.string.error_reach_server
             }
             Snackbar.make(binding.root, errorResId, Snackbar.LENGTH_SHORT).show()
         }
+    }
+
+    private fun navigate(intent: NavigationIntent) {
+        intent.navigate(findNavController())
     }
 
 }

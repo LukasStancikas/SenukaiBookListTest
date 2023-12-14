@@ -9,6 +9,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.lukasstancikas.booklists.ui.bookdetails.BookDetailsFragmentArgs
 import com.lukasstancikas.booklists.ui.booklist.MyListFragmentArgs
 import com.lukasstancikas.senukaitest.R
 import com.lukasstancikas.senukaitest.databinding.ActivityMainBinding
@@ -23,8 +24,13 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-        val navHostFragment =
-            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment?)!!
+
+        setupNavController()
+    }
+
+    private fun setupNavController() {
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
         val navController = navHostFragment.navController
         appBarConfiguration = AppBarConfiguration(
             setOf(
@@ -37,14 +43,18 @@ class MainActivity : AppCompatActivity() {
                                                         arguments: Bundle? ->
             arguments?.let {
                 when (destination.id) {
-                    com.lukasstancikas.booklists.R.id.myList -> MyListFragmentArgs.fromBundle(it).bookList.title
+                    com.lukasstancikas.booklists.R.id.myList ->
+                        MyListFragmentArgs.fromBundle(it).bookList.title
+
+                    com.lukasstancikas.booklists.R.id.bookDetails ->
+                        BookDetailsFragmentArgs.fromBundle(it).book.title
+
                     else -> null
                 }?.let { title ->
                     binding.toolbar.title = title
                 }
             }
         }
-
     }
 
     override fun onSupportNavigateUp(): Boolean {

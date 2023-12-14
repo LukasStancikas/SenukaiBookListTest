@@ -11,12 +11,9 @@ class PopulatedMyListUseCase(
     private val booksRepository: BooksRepository
 ) {
     operator fun invoke(bookList: BookList): Flow<BookList> = flow {
-        // retrieve books if somehow missing (like clicked before previous fetch finished)
-        val mutableListBooks = bookList.books
-            .ifEmpty {
-                val books = booksRepository.getAllBooks()
-                books.filter { it.listId == bookList.id }
-            }
+        // retrieve books because previously we could have cut to $MAX_BOOKS_PER_LIST or less
+        val mutableListBooks = booksRepository.getAllBooks()
+            .filter { it.listId == bookList.id }
             .map { it.copy(isLoading = true) }
             .toMutableList()
         emit(bookList.copy(books = mutableListBooks))

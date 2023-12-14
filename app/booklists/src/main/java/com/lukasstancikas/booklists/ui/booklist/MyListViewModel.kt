@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lukasstancikas.booklists.data.Book
 import com.lukasstancikas.booklists.data.BookList
+import com.lukasstancikas.booklists.data.NetworkError
+import com.lukasstancikas.booklists.navigator.NavigationIntent
 import com.lukasstancikas.booklists.usecase.PopulatedMyListUseCase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -23,8 +25,11 @@ class MyListViewModel(
     val uiState: StateFlow<MyListUiState> =
         savedStateHandle.getStateFlow(STATE_KEY, MyListUiState(bookList = bookList))
 
-    private val _errorStream = MutableSharedFlow<MyListUiState.Error>()
-    val errorStream: SharedFlow<MyListUiState.Error> = _errorStream
+    private val _errorStream = MutableSharedFlow<NetworkError>()
+    val errorStream: SharedFlow<NetworkError> = _errorStream
+
+    private val _navigationStream = MutableSharedFlow<NavigationIntent>()
+    val navigationStream: SharedFlow<NavigationIntent> = _navigationStream
 
     private var fetchJob: Job? = null
 
@@ -34,10 +39,9 @@ class MyListViewModel(
         updateUiState { it.copy(isLoading = false) }
 
         when (throwable) {
-            is CancellationException -> MyListUiState.Error.Cancelled
+            is CancellationException -> NetworkError.Cancelled
             else -> null
-        }?.let { error -> _errorStream.tryEmit(error) }
-
+        }?.let { error -> viewModelScope.launch { _errorStream.emit(error) } }
     }
 
     init {
@@ -48,8 +52,8 @@ class MyListViewModel(
         fetchBooksWithDetails()
     }
 
-    fun onBookClick(book: Book) {
-
+    fun onBookClick(book: Book) = viewModelScope.launch {
+        _navigationStream.emit(NavigationIntent.BookSelectedFromLists(book))
     }
 
     private fun fetchBooksWithDetails() {

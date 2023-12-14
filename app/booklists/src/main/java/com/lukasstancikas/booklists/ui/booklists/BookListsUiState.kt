@@ -8,9 +8,4 @@ import kotlinx.parcelize.Parcelize
 data class BookListsUiState(
     val isLoading: Boolean = false,
     val bookLists: List<BookList> = emptyList(),
-): Parcelable {
-    sealed class Error {
-        data object Cancelled: Error()
-        data object FailedToReachServer: Error()
-    }
-}
+) : Parcelable

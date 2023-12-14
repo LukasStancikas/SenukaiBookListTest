@@ -17,15 +17,39 @@
             app:exitAnim="@anim/nav_slide_out_left"
             app:popEnterAnim="@anim/nav_slide_in_left"
             app:popExitAnim="@anim/nav_slide_out_right" />
+        <action
+            android:id="@+id/action_bookLists_to_bookDetailsFragment"
+            app:destination="@id/bookDetails"
+            app:enterAnim="@anim/nav_slide_in_right"
+            app:exitAnim="@anim/nav_slide_out_left"
+            app:popEnterAnim="@anim/nav_slide_in_left"
+            app:popExitAnim="@anim/nav_slide_out_right" />
     </fragment>
 
     <fragment
         android:id="@+id/myList"
         android:name="com.lukasstancikas.booklists.ui.booklist.MyListFragment"
         android:label="MyList"
-        tools:layout="@layout/fragment_my_list" >
+        tools:layout="@layout/fragment_my_list">
         <argument
             android:name="bookList"
             app:argType="com.lukasstancikas.booklists.data.BookList" />
+        <action
+            android:id="@+id/action_myList_to_bookDetailsFragment"
+            app:destination="@id/bookDetails"
+            app:enterAnim="@anim/nav_slide_in_right"
+            app:exitAnim="@anim/nav_slide_out_left"
+            app:popEnterAnim="@anim/nav_slide_in_left"
+            app:popExitAnim="@anim/nav_slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/bookDetails"
+        android:name="com.lukasstancikas.booklists.ui.bookdetails.BookDetailsFragment"
+        android:label="BookDetails"
+        tools:layout="@layout/fragment_book_details">
+        <argument
+            android:name="book"
+            app:argType="com.lukasstancikas.booklists.data.Book" />
     </fragment>
 </navigation>

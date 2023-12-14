@@ -3,7 +3,6 @@ package com.lukasstancikas.booklists.usecase
 import com.lukasstancikas.booklists.data.Book
 import com.lukasstancikas.booklists.data.BookList
 import com.lukasstancikas.booklists.network.BooksRepository
-import kotlinx.coroutines.NonCancellable.cancel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +18,12 @@ class PopulatedBookListsUseCase(private val booksRepository: BooksRepository) {
         // create list_id containers to sort all books into containers
         val bookListsContainers = booksLists.map { it.id }.associateWith { mutableListOf<Book>() }
         books.forEach {
-            bookListsContainers[it.listId]?.add(it)
+            bookListsContainers[it.listId]?.let { container ->
+                // business requirement to show up to 5 books in a list of lists
+                if (container.bookShowLimitReached()) {
+                    container.add(it)
+                }
+            }
         }
 
         // populate existing book lists with books from corresponding containers
@@ -33,5 +37,11 @@ class PopulatedBookListsUseCase(private val booksRepository: BooksRepository) {
 
         // Once all data has been emitted, cancel the flow to prevent any further emissions
         currentCoroutineContext().cancel()
+    }
+
+    private fun List<Book>.bookShowLimitReached() = size >= MAX_BOOKS_PER_LIST
+
+    companion object {
+        const val MAX_BOOKS_PER_LIST = 5
     }
 }
