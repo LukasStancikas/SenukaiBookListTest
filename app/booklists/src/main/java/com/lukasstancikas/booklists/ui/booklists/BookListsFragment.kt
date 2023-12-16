@@ -19,6 +19,13 @@ class BookListsFragment : FragmentWithCommonStreams<BookListsUiState>(R.layout.f
         BookListsAdapter(viewModel::onAllClick, viewModel::onBookClick)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) {
+            viewModel.onPullRefresh()
+        }
+    }
+
     //region $ViewBinding
     override fun onCreateView(
         inflater: LayoutInflater,

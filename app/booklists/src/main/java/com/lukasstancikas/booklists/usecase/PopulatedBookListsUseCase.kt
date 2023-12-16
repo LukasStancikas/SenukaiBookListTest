@@ -3,6 +3,7 @@ package com.lukasstancikas.booklists.usecase
 import com.lukasstancikas.booklists.data.Book
 import com.lukasstancikas.booklists.data.BookList
 import com.lukasstancikas.booklists.network.BooksRepository
+import com.lukasstancikas.booklists.util.update
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
@@ -27,12 +28,14 @@ class PopulatedBookListsUseCase(private val booksRepository: BooksRepository) {
         }
 
         // populate existing book lists with books from corresponding containers
-        val populatedBookLists = booksLists.toMutableList()
-        populatedBookLists.forEachIndexed { index, bookList ->
+        // NOTE: creating a new instance of list is needed for stateflow to emit a different value
+        var updatedBookLists = booksLists
+        booksLists.forEachIndexed { index, bookList ->
             val booksForList = bookListsContainers[bookList.id] ?: bookList.books
-            populatedBookLists[index] = bookList.copy(books = booksForList, isLoading = false)
-            // update UI after each book list has been populated
-            emit(populatedBookLists)
+            val updatedList = bookList.copy(books = booksForList, isLoading = false)
+            updatedBookLists = updatedBookLists.update(index, updatedList)
+            // emit each change
+            emit(updatedBookLists)
         }
 
         // Once all data has been emitted, cancel the flow to prevent any further emissions

@@ -45,7 +45,9 @@ class BookListsAdapter(
         }
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return oldItems[oldItemPosition].title == newItems[newItemPosition].title && oldItems[oldItemPosition].books == newItems[newItemPosition].books
+            return oldItems[oldItemPosition].title == newItems[newItemPosition].title
+                    && oldItems[oldItemPosition].books == newItems[newItemPosition].books
+                    && oldItems[oldItemPosition].isLoading == newItems[newItemPosition].isLoading
         }
 
         override fun getOldListSize(): Int {

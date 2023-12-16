@@ -27,6 +27,13 @@ class BookDetailsFragment :
     override val viewModel: BookViewModel by viewModel { parametersOf(arguments.book) }
     private val formatter = DateTimeFormatter.ofPattern("yyyy-LLLL-dd")
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) {
+            viewModel.onInitialize()
+        }
+    }
+
     //region $ViewBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

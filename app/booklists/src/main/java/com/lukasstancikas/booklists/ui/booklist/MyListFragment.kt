@@ -22,6 +22,13 @@ class MyListFragment : FragmentWithCommonStreams<MyListUiState>(R.layout.fragmen
         MyListAdapter(viewModel::onBookClick)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) {
+            viewModel.onPullRefresh()
+        }
+    }
+
     //region $ViewBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

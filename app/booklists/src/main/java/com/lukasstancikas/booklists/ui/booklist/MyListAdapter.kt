@@ -58,6 +58,7 @@ class MyListAdapter(
             return oldItems[oldItemPosition].title == newItems[newItemPosition].title
                     && oldItems[oldItemPosition].author == newItems[newItemPosition].author
                     && oldItems[oldItemPosition].img == newItems[newItemPosition].img
+                    && oldItems[oldItemPosition].isLoading == newItems[newItemPosition].isLoading
         }
 
         override fun getOldListSize(): Int {
