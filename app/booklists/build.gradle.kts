@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.safeArgs)
     alias(libs.plugins.parcelize)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -55,8 +56,15 @@ dependencies {
     // network
     implementation(libs.retrofit)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
+    // swipe refresh
     implementation(libs.androidx.swiperefreshlayout)
+    // image load
     implementation(libs.glide)
+    // database
+    implementation(libs.androidx.room.common)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
     testImplementation(libs.googleTruth)

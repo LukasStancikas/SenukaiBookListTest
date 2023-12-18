@@ -9,6 +9,8 @@ import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreams
 import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreamsHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 
 class BookViewModel(
     book: Book,
@@ -22,24 +24,26 @@ class BookViewModel(
 
     fun onInitialize() {
         if (uiState.value.book.isWithoutDetails) {
-            onPullRefresh()
+            fetchBookDetails(false)
         }
     }
 
     fun onPullRefresh() {
-        fetchBookDetails()
+        fetchBookDetails(true)
     }
 
-    private fun fetchBookDetails() {
-        val reduceOnError = { latestState: BookDetailsUiState ->
-            latestState.copy(isLoading = false)
-        }
-
+    private fun fetchBookDetails(forceRefresh: Boolean) {
         fetchJob?.cancel()
-        fetchJob = viewModelScope.launchWithScopedErrorHandling(Dispatchers.IO, reduceOnError) {
+        fetchJob = viewModelScope.launch(Dispatchers.IO) {
             updateUiState { it.copy(isLoading = true) }
-            val bookDetails = booksRepository.getBookDetails(uiState.value.book.id)
-            updateUiState { it.copy(book = bookDetails, isLoading = false) }
+            booksRepository.getBookDetails(uiState.value.book.id, forceRefresh)
+                .catch { error ->
+                    onError(error)
+                    updateUiState { it.copy(isLoading = false) }
+                }
+                .collect { bookDetails ->
+                    updateUiState { it.copy(book = bookDetails, isLoading = false) }
+                }
         }
     }
 }

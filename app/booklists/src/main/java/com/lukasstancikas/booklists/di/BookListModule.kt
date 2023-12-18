@@ -9,9 +9,11 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
+import java.time.format.DateTimeFormatter
 
 object BookListModule {
     fun get() = module {
+        single<DateTimeFormatter> { DateTimeFormatter.ISO_OFFSET_DATE_TIME }
         factoryOf(::PopulatedMyListUseCase)
         factoryOf(::PopulatedBookListsUseCase)
         viewModelOf(::BookListsViewModel)

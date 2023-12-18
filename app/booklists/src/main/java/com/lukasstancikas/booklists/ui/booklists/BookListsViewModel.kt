@@ -12,6 +12,7 @@ import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreamsHandler
 import com.lukasstancikas.booklists.usecase.PopulatedBookListsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class BookListsViewModel(
@@ -23,8 +24,11 @@ class BookListsViewModel(
 
     private var fetchJob: Job? = null
 
+    fun onInitialize() {
+        fetchBookLists(false)
+    }
     fun onPullRefresh() {
-        fetchBookLists()
+        fetchBookLists(true)
     }
 
     fun onAllClick(bookList: BookList) = viewModelScope.launch {
@@ -35,18 +39,18 @@ class BookListsViewModel(
         emitNavigation(BookSelectedFromLists(book))
     }
 
-    private fun fetchBookLists() {
-        val reduceOnError = { latestState: BookListsUiState ->
-            latestState.copy(isLoading = false)
-        }
-
+    private fun fetchBookLists(forceRefresh: Boolean) {
         fetchJob?.cancel()
-        fetchJob = viewModelScope.launchWithScopedErrorHandling(Dispatchers.IO, reduceOnError) {
+        fetchJob = viewModelScope.launch(Dispatchers.IO) {
             updateUiState { it.copy(isLoading = true) }
-            booksListUseCase().collect { data ->
-                updateUiState { it.copy(bookLists = data) }
-            }
-            updateUiState { it.copy(isLoading = false) }
+            booksListUseCase(forceRefresh)
+                .catch { error ->
+                    onError(error)
+                    updateUiState { it.copy(isLoading = false) }
+                }
+                .collect { data ->
+                    updateUiState { it.copy(bookLists = data, isLoading = false) }
+                }
         }
     }
 }

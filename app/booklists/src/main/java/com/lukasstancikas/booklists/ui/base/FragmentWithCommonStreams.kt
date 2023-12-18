@@ -3,11 +3,11 @@ package com.lukasstancikas.booklists.ui.base
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.LayoutRes
-import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import com.lukasstancikas.booklists.R
 import com.lukasstancikas.booklists.data.NetworkError
 import com.lukasstancikas.booklists.navigator.NavigationIntent
@@ -20,8 +20,6 @@ abstract class FragmentWithCommonStreams<UiState>(
 
     abstract val viewModel: ViewModelCommonStreams<UiState>
     abstract fun renderState(state: UiState)
-
-    abstract fun showError(@StringRes errorResId: Int)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -38,11 +36,15 @@ abstract class FragmentWithCommonStreams<UiState>(
     }
 
     private fun getErrorString(error: NetworkError) {
-        val errorResId = when (error) {
-            NetworkError.Cancelled -> R.string.error_cancelled
-            NetworkError.FailedToReachServer -> R.string.error_reach_server
+        view?.let { view ->
+            when (error) {
+                NetworkError.Cancelled -> getString(R.string.error_cancelled)
+                NetworkError.FailedToReachServer -> getString(R.string.error_reach_server)
+                is NetworkError.Unexpected -> error.message
+            }?.let { errorText ->
+                Snackbar.make(view, errorText, Snackbar.LENGTH_SHORT).show()
+            }
         }
-        showError(errorResId)
     }
 
     private fun navigate(intent: NavigationIntent) = findNavController().let {

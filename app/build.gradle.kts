@@ -50,10 +50,10 @@ dependencies {
     // network
     implementation(libs.retrofit)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
-    // dependency injection
-    implementation(libs.koin.android)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
+    // dependency injection
+    implementation(libs.koin.android)
 
     testImplementation(libs.junit)
     testImplementation(libs.googleTruth)

@@ -9,7 +9,6 @@ import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.google.android.material.snackbar.Snackbar
 import com.lukasstancikas.booklists.R
 import com.lukasstancikas.booklists.databinding.FragmentBookDetailsBinding
 import com.lukasstancikas.booklists.ui.base.FragmentWithCommonStreams
@@ -25,7 +24,7 @@ class BookDetailsFragment :
     private val binding get() = _binding!!
     private val arguments: BookDetailsFragmentArgs by navArgs()
     override val viewModel: BookViewModel by viewModel { parametersOf(arguments.book) }
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-LLLL-dd")
+    private val formatter = DateTimeFormatter.ofPattern("yyyy LLLL dd")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,15 +76,10 @@ class BookDetailsFragment :
         bookPublicationDate.isVisible = state.book.publicationDate != null
         state.book.publicationDate?.format(formatter)?.let {
             bookPublicationDate.text =
-                getString(R.string.book_publication_date, state.book.publicationDate)
+                getString(R.string.book_publication_date, it)
         }
+        println("state.isLoading = ${state.isLoading}")
         bookListsSwipeRefresh.isRefreshing = state.isLoading
-    }
-
-    override fun showError(errorResId: Int) {
-        context?.let {
-            Snackbar.make(binding.root, errorResId, Snackbar.LENGTH_SHORT).show()
-        }
     }
     //endregion
 

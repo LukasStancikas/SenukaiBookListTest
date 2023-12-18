@@ -16,6 +16,8 @@ lifecycleViewmodelKtx = "2.6.2"
 navigationFragmentKtx = "2.7.6"
 navigationUiKtx = "2.7.6"
 fragmentKtx = "1.6.2"
+roomRuntime = "2.6.1"
+roomCompiler = "2.6.1"
 serialization = "1.6.2"
 safeArgs = "2.7.6"
 koinAndroid = "3.5.2-RC1"
@@ -28,6 +30,8 @@ okhttp = "5.0.0-alpha.11"
 kotlinxCoroutinesTest = "1.8.0-RC"
 mockk = "1.12.5"
 turbine = "1.0.0"
+roomCommon = "2.6.1"
+kspPlugin = "1.9.21-1.0.15"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -56,6 +60,10 @@ logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-intercep
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomCommon" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -64,5 +72,6 @@ jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "k
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlinParcelize" }
 safeArgs = { id = "androidx.navigation.safeargs.kotlin", version.ref = "safeArgs" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "kspPlugin" }
 
 

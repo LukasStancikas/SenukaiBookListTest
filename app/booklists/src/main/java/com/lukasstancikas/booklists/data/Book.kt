@@ -5,7 +5,7 @@ import com.lukasstancikas.booklists.util.DateSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import java.time.LocalDate
+import java.time.OffsetDateTime
 
 @Serializable
 @Parcelize
@@ -18,7 +18,7 @@ data class Book(
     val author: String? = null,
     val isbn: String? = null,
     @Serializable(with = DateSerializer::class)
-    val publicationDate: LocalDate? = null,
+    val publicationDate: OffsetDateTime? = null,
     @Transient
     val isLoading: Boolean = false
 ) : Parcelable {

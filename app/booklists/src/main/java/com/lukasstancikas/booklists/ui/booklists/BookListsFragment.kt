@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.material.snackbar.Snackbar
 import com.lukasstancikas.booklists.R
 import com.lukasstancikas.booklists.databinding.FragmentListsBinding
 import com.lukasstancikas.booklists.ui.base.FragmentWithCommonStreams
@@ -22,7 +21,7 @@ class BookListsFragment : FragmentWithCommonStreams<BookListsUiState>(R.layout.f
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) {
-            viewModel.onPullRefresh()
+            viewModel.onInitialize()
         }
     }
 
@@ -51,12 +50,6 @@ class BookListsFragment : FragmentWithCommonStreams<BookListsUiState>(R.layout.f
     override fun renderState(state: BookListsUiState) = with(binding) {
         adapter.setItems(state.bookLists)
         bookListsSwipeRefresh.isRefreshing = state.isLoading
-    }
-
-    override fun showError(errorResId: Int) {
-        context?.let {
-            Snackbar.make(binding.root, errorResId, Snackbar.LENGTH_SHORT).show()
-        }
     }
     //endregion
 

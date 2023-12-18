@@ -3,5 +3,7 @@
     <dimen name="item_book_list_padding">16dp</dimen>
     <dimen name="item_book_list_padding_big">24dp</dimen>
     <dimen name="book_list_title_size">20sp</dimen>
+    <dimen name="book_list_title_small">16sp</dimen>
     <dimen name="item_book_image_size">100dp</dimen>
+    <dimen name="max_image_width">400dp</dimen>
 </resources>

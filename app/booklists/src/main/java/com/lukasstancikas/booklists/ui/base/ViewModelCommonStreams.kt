@@ -4,13 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import com.lukasstancikas.booklists.data.NetworkError
 import com.lukasstancikas.booklists.navigator.NavigationIntent
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.net.UnknownHostException
-import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.cancellation.CancellationException
 
 interface ViewModelCommonStreams<UiState> {
@@ -19,17 +18,11 @@ interface ViewModelCommonStreams<UiState> {
     val navigationStream: SharedFlow<NavigationIntent>
 
     val uiState: StateFlow<UiState>
-    fun updateUiState(reduce: (UiState) -> UiState)
-
-    suspend fun emitError(error: NetworkError)
+    fun CoroutineScope.updateUiState(reduce: (UiState) -> UiState)
 
     suspend fun emitNavigation(navigationIntent: NavigationIntent)
 
-    fun CoroutineScope.launchWithScopedErrorHandling(
-        context: CoroutineContext,
-        reduceUiStateOnError: (UiState) -> UiState,
-        block: suspend () -> Unit
-    ): Job
+    suspend fun onError(throwable: Throwable)
 }
 
 class ViewModelCommonStreamsHandler<UiState>(
@@ -44,36 +37,22 @@ class ViewModelCommonStreamsHandler<UiState>(
     override val errorStream: SharedFlow<NetworkError> = _errorStream
     override val navigationStream: SharedFlow<NavigationIntent> = _navigationStream
 
-    override suspend fun emitError(error: NetworkError) {
-        _errorStream.emit(error)
-    }
-
     override suspend fun emitNavigation(navigationIntent: NavigationIntent) {
         _navigationStream.emit(navigationIntent)
     }
 
-    override fun CoroutineScope.launchWithScopedErrorHandling(
-        context: CoroutineContext,
-        reduceUiStateOnError: (UiState) -> UiState,
-        block: suspend () -> Unit
-    ): Job = launch(context) {
-            try {
-                block()
-            } catch (e: Exception) {
-                e.printStackTrace()
+    override suspend fun onError(throwable: Throwable) {
+        when (throwable) {
+            is CancellationException -> NetworkError.Cancelled
+            is UnknownHostException -> NetworkError.FailedToReachServer
+            else -> NetworkError.Unexpected(throwable.localizedMessage)
+        }.let { error -> _errorStream.emit(error) }
+    }
 
-                updateUiState { reduceUiStateOnError(it) }
-
-                when (e) {
-                    is CancellationException -> NetworkError.Cancelled
-                    is UnknownHostException -> NetworkError.FailedToReachServer
-                    else -> null
-                }?.let { error -> emitError(error)  }
-            }
+    override fun CoroutineScope.updateUiState(reduce: (UiState) -> UiState) {
+        launch(Dispatchers.Main) {
+            savedStateHandle[STATE_KEY] = reduce(uiState.value)
         }
-
-    override fun updateUiState(reduce: (UiState) -> UiState) {
-        savedStateHandle[STATE_KEY] = reduce(uiState.value)
     }
 
     companion object {
