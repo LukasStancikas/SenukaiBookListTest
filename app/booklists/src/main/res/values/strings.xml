@@ -7,8 +7,8 @@
     </string>
     <string name="button_all">All</string>
     <string name="content_description_book_item_image">This is a cover image of this book</string>
-    <string name="error_cancelled">Book fetching was cancelled</string>
     <string name="error_reach_server">Failed to reach the cloud</string>
     <string name="book_isbn">ISBN: %1$s</string>
     <string name="book_publication_date">Publication Date: %1$s</string>
+    <string name="error_unexpected">Unexpected error occurred</string>
 </resources>

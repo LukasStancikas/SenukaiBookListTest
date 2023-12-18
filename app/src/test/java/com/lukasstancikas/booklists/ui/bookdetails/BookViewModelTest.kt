@@ -10,12 +10,12 @@ import com.lukasstancikas.booklists.ui.MainCoroutineRule
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.net.UnknownHostException
-import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BookViewModelTest {
@@ -46,7 +46,7 @@ class BookViewModelTest {
     fun `onPullRefresh should fetch book details and update UI state`() = runTest {
         turbineScope {
             val bookDetails = initialBook.copy(author = "Fake Author")
-            coEvery { repository.getBookDetails(viewModel.uiState.value.book.id) } returns bookDetails
+            coEvery { repository.getBookDetails(viewModel.uiState.value.book.id, any()) } returns flowOf(bookDetails)
 
             val turbine = viewModel.uiState.testIn(backgroundScope)
 
@@ -63,6 +63,9 @@ class BookViewModelTest {
 
             turbine.awaitItem().let {
                 Truth.assertThat(it.book.author).isEqualTo(bookDetails.author)
+            }
+
+            turbine.awaitItem().let {
                 Truth.assertThat(it.isLoading).isFalse()
             }
         }
@@ -72,7 +75,7 @@ class BookViewModelTest {
     fun `fetchBookDetails should handle network errors`() = runTest {
         turbineScope {
             val unknownHostException = UnknownHostException()
-            coEvery { repository.getBookDetails(viewModel.uiState.value.book.id) } throws unknownHostException
+            coEvery { repository.getBookDetails(viewModel.uiState.value.book.id, any()) } throws unknownHostException
 
             val stateTurbine = viewModel.uiState.testIn(backgroundScope)
             val errorTurbine = viewModel.errorStream.testIn(backgroundScope)
@@ -91,36 +94,6 @@ class BookViewModelTest {
             }
             errorTurbine.awaitItem().let {
                 Truth.assertThat(it).isEqualTo(NetworkError.FailedToReachServer)
-            }
-        }
-    }
-
-    @Test
-    fun `fetchBookDetails should handle cancellation`() = runTest {
-        turbineScope {
-            val cancellationException = CancellationException()
-            coEvery { repository.getBookDetails(viewModel.uiState.value.book.id) } throws cancellationException
-
-            val stateTurbine = viewModel.uiState.testIn(backgroundScope)
-            val errorTurbine = viewModel.errorStream.testIn(backgroundScope)
-
-            viewModel.onPullRefresh()
-
-             stateTurbine.awaitItem().let {
-                Truth.assertThat(it.isLoading).isFalse()
-            }
-
-             stateTurbine.awaitItem().let {
-                Truth.assertThat(it.isLoading).isTrue()
-            }
-
-             stateTurbine.awaitItem().let {
-                Truth.assertThat(it.book.author).isNull()
-                Truth.assertThat(it.isLoading).isFalse()
-            }
-
-            errorTurbine.awaitItem().let {
-                Truth.assertThat(it).isEqualTo(NetworkError.Cancelled)
             }
         }
     }

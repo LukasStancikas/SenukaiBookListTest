@@ -12,7 +12,6 @@ import com.lukasstancikas.booklists.usecase.PopulatedMyListUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class MyListViewModel(
@@ -40,15 +39,16 @@ class MyListViewModel(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch(Dispatchers.IO) {
             updateUiState { it.copy(isLoading = true) }
-
-            myListUseCase(uiState.value.bookList, forceRefresh)
-                .catch {
-                    onError(it)
-                    cancelLoadingFlags()
-                }
-                .collect { data ->
-                    updateUiState { it.copy(bookList = data, isLoading = false) }
-                }
+            try {
+                myListUseCase(uiState.value.bookList, forceRefresh)
+                    .collect { data ->
+                        updateUiState { it.copy(bookList = data) }
+                    }
+            } catch (e: Exception) {
+                onError(e)
+            } finally {
+                cancelLoadingFlags()
+            }
         }
     }
 

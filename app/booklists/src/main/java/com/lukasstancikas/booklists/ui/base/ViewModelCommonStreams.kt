@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.net.UnknownHostException
-import kotlin.coroutines.cancellation.CancellationException
 
 interface ViewModelCommonStreams<UiState> {
     val errorStream: SharedFlow<NetworkError>
@@ -43,7 +42,6 @@ class ViewModelCommonStreamsHandler<UiState>(
 
     override suspend fun onError(throwable: Throwable) {
         when (throwable) {
-            is CancellationException -> NetworkError.Cancelled
             is UnknownHostException -> NetworkError.FailedToReachServer
             else -> NetworkError.Unexpected(throwable.localizedMessage)
         }.let { error -> _errorStream.emit(error) }

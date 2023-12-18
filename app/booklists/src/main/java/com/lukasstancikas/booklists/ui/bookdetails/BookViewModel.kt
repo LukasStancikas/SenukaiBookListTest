@@ -9,7 +9,6 @@ import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreams
 import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreamsHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class BookViewModel(
@@ -36,14 +35,16 @@ class BookViewModel(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch(Dispatchers.IO) {
             updateUiState { it.copy(isLoading = true) }
-            booksRepository.getBookDetails(uiState.value.book.id, forceRefresh)
-                .catch { error ->
-                    onError(error)
-                    updateUiState { it.copy(isLoading = false) }
-                }
-                .collect { bookDetails ->
-                    updateUiState { it.copy(book = bookDetails, isLoading = false) }
-                }
+            try {
+                booksRepository.getBookDetails(uiState.value.book.id, forceRefresh)
+                    .collect { bookDetails ->
+                        updateUiState { it.copy(book = bookDetails) }
+                    }
+            } catch (e: Exception) {
+                onError(e)
+            } finally {
+                updateUiState { it.copy(isLoading = false) }
+            }
         }
     }
 }

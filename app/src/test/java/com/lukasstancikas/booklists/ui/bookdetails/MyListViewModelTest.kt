@@ -12,12 +12,12 @@ import com.lukasstancikas.booklists.usecase.PopulatedMyListUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.net.UnknownHostException
-import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MyListViewModelTest {
@@ -42,8 +42,9 @@ class MyListViewModelTest {
     fun `onPullRefresh should fetch the list and update UI state`() = runTest {
         turbineScope {
 
-            coEvery { repository.getBookDetails(any()) } returns bookDetails
-            coEvery { repository.getAllBooks() } returns listBooks
+            coEvery { repository.getBookDetails(bookDetails.id, any()) } returns flowOf(bookDetails)
+            coEvery { repository.getBookDetails(bookDetails2.id, any()) } returns flowOf(bookDetails2)
+            coEvery { repository.getAllBooks(any()) } returns flowOf(listBooks)
 
             val turbine = viewModel.uiState.testIn(backgroundScope)
             viewModel.onPullRefresh()
@@ -59,14 +60,9 @@ class MyListViewModelTest {
             turbine.awaitItem().let {
                 Truth.assertThat(it.bookList.books).hasSize(2)
                 Truth.assertThat(it.isLoading).isTrue()
-                Truth.assertThat(it.bookList.books[0].isLoading).isTrue()
-                Truth.assertThat(it.bookList.books[0].isWithoutDetails).isTrue()
-            }
-            turbine.awaitItem().let {
-                Truth.assertThat(it.bookList.books).hasSize(2)
-                Truth.assertThat(it.isLoading).isTrue()
                 Truth.assertThat(it.bookList.books[0].isLoading).isFalse()
                 Truth.assertThat(it.bookList.books[0].isWithoutDetails).isFalse()
+                Truth.assertThat(it.bookList.books[1].isLoading).isTrue()
             }
             turbine.awaitItem().let {
                 Truth.assertThat(it.bookList.books).hasSize(2)
@@ -74,8 +70,6 @@ class MyListViewModelTest {
                 Truth.assertThat(it.bookList.books[1].isLoading).isFalse()
                 Truth.assertThat(it.bookList.books[1].isWithoutDetails).isFalse()
             }
-
-
             turbine.awaitItem().let {
                 Truth.assertThat(it.isLoading).isFalse()
             }
@@ -86,7 +80,7 @@ class MyListViewModelTest {
     fun `fetching book lists should handle network errors`() = runTest {
         turbineScope {
             val unknownHostException = UnknownHostException()
-            coEvery { repository.getAllBooks() } throws unknownHostException
+            coEvery { repository.getAllBooks(any()) } throws unknownHostException
 
             val stateTurbine = viewModel.uiState.testIn(backgroundScope)
             val errorTurbine = viewModel.errorStream.testIn(backgroundScope)
@@ -105,33 +99,6 @@ class MyListViewModelTest {
             }
             errorTurbine.awaitItem().let {
                 Truth.assertThat(it).isEqualTo(NetworkError.FailedToReachServer)
-            }
-        }
-    }
-
-    @Test
-    fun `fetchBookDetails should handle cancellation`() = runTest {
-        turbineScope {
-            val cancellationException = CancellationException()
-            coEvery { repository.getAllBooks() } throws cancellationException
-
-            val stateTurbine = viewModel.uiState.testIn(backgroundScope)
-            val errorTurbine = viewModel.errorStream.testIn(backgroundScope)
-
-            viewModel.onPullRefresh()
-
-            stateTurbine.awaitItem().let {
-                Truth.assertThat(it.isLoading).isFalse()
-            }
-            stateTurbine.awaitItem().let {
-                Truth.assertThat(it.isLoading).isTrue()
-            }
-            stateTurbine.awaitItem().let {
-                Truth.assertThat(it.bookList.books).isEmpty()
-                Truth.assertThat(it.isLoading).isFalse()
-            }
-            errorTurbine.awaitItem().let {
-                Truth.assertThat(it).isEqualTo(NetworkError.Cancelled)
             }
         }
     }

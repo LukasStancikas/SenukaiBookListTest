@@ -2,7 +2,7 @@ package com.lukasstancikas.booklists.ui.bookdetails
 
 import com.lukasstancikas.booklists.data.Book
 import com.lukasstancikas.booklists.data.BookList
-import java.time.LocalDate
+import java.time.OffsetDateTime
 
 internal val listBooks = listOf(
     Book(
@@ -53,5 +53,15 @@ internal val bookDetails = Book(
     "Some Description",
     "Some Author",
     "01110",
-    LocalDate.now()
+    OffsetDateTime.now()
+)
+internal val bookDetails2 = Book(
+    2,
+    1,
+    "First Book Ever made",
+    "",
+    "Some Description",
+    "Some Author",
+    "01110",
+    OffsetDateTime.now()
 )

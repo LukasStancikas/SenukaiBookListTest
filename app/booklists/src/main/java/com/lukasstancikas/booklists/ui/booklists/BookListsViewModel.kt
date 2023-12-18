@@ -12,7 +12,6 @@ import com.lukasstancikas.booklists.ui.base.ViewModelCommonStreamsHandler
 import com.lukasstancikas.booklists.usecase.PopulatedBookListsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class BookListsViewModel(
@@ -43,14 +42,16 @@ class BookListsViewModel(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch(Dispatchers.IO) {
             updateUiState { it.copy(isLoading = true) }
-            booksListUseCase(forceRefresh)
-                .catch { error ->
-                    onError(error)
-                    updateUiState { it.copy(isLoading = false) }
-                }
-                .collect { data ->
-                    updateUiState { it.copy(bookLists = data, isLoading = false) }
-                }
+            try {
+                booksListUseCase(forceRefresh)
+                    .collect { data ->
+                        updateUiState { it.copy(bookLists = data) }
+                    }
+            } catch (e: Exception) {
+                onError(e)
+            } finally {
+                updateUiState { it.copy(isLoading = false) }
+            }
         }
     }
 }

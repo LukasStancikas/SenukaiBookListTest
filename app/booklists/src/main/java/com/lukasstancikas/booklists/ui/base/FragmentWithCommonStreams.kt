@@ -37,13 +37,11 @@ abstract class FragmentWithCommonStreams<UiState>(
 
     private fun getErrorString(error: NetworkError) {
         view?.let { view ->
-            when (error) {
-                NetworkError.Cancelled -> getString(R.string.error_cancelled)
+            val errorText = when (error) {
                 NetworkError.FailedToReachServer -> getString(R.string.error_reach_server)
                 is NetworkError.Unexpected -> error.message
-            }?.let { errorText ->
-                Snackbar.make(view, errorText, Snackbar.LENGTH_SHORT).show()
-            }
+            } ?: getString(R.string.error_unexpected)
+            Snackbar.make(view, errorText, Snackbar.LENGTH_SHORT).show()
         }
     }
 
