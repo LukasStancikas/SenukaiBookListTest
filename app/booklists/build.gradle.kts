@@ -10,6 +10,7 @@ plugins {
 android {
     namespace = "com.lukasstancikas.booklists"
     compileSdk = 34
+    buildToolsVersion = "34.0.0"
 
     defaultConfig {
         minSdk = 26
@@ -37,7 +38,6 @@ android {
     buildFeatures {
         viewBinding = true
     }
-    buildToolsVersion = "34.0.0"
 }
 
 dependencies {

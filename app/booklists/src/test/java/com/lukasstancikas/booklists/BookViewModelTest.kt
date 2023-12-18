@@ -1,13 +1,12 @@
-package com.lukasstancikas.booklists.ui.bookdetails
+package com.lukasstancikas.booklists
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth
+import com.lukasstancikas.booklists.data.Book
 import com.lukasstancikas.booklists.data.NetworkError
 import com.lukasstancikas.booklists.network.BooksRepository
-import com.lukasstancikas.booklists.ui.MainCoroutineRule
-import com.lukasstancikas.booklists.ui.booklists.BookListsViewModel
-import com.lukasstancikas.booklists.usecase.PopulatedBookListsUseCase
+import com.lukasstancikas.booklists.ui.bookdetails.BookViewModel
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,56 +18,53 @@ import org.junit.Test
 import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class BookListsViewModelTest {
+class BookViewModelTest {
 
     @get:Rule
     var mainCoroutineRule = MainCoroutineRule()
 
-    private lateinit var viewModel: BookListsViewModel
+    private lateinit var viewModel: BookViewModel
     private val repository = mockk<BooksRepository>()
+    private val initialBook = Book(1, 1, "Title", "https://google.com")
 
     @Before
     fun setup() {
-        viewModel = BookListsViewModel(
+        viewModel = BookViewModel(
+            book = initialBook,
             savedStateHandle = SavedStateHandle(),
-            booksListUseCase = PopulatedBookListsUseCase(repository)
+            booksRepository = repository
         )
     }
 
     @Test
-    fun `onPullRefresh should fetch book lists and update UI state`() = runTest {
-        turbineScope {
+    fun `viewModel should have initial book ready`() = runTest {
+        Truth.assertThat(viewModel.uiState.value).isNotNull()
+        Truth.assertThat(viewModel.uiState.value.book).isEqualTo(initialBook)
+    }
 
-            coEvery { repository.getBookLists(any()) } returns flowOf(listBookLists)
-            coEvery { repository.getAllBooks(any()) } returns flowOf(listBooks)
+    @Test
+    fun `onPullRefresh should fetch book details and update UI state`() = runTest {
+        turbineScope {
+            val bookDetails = initialBook.copy(author = "Fake Author")
+            coEvery { repository.getBookDetails(viewModel.uiState.value.book.id, any()) } returns flowOf(bookDetails)
 
             val turbine = viewModel.uiState.testIn(backgroundScope)
+
             viewModel.onPullRefresh()
+
             turbine.awaitItem().let {
                 Truth.assertThat(it.isLoading).isFalse()
+                Truth.assertThat(it.book.author).isNull()
             }
 
             turbine.awaitItem().let {
-                Truth.assertThat(it.bookLists).isEmpty()
                 Truth.assertThat(it.isLoading).isTrue()
             }
 
             turbine.awaitItem().let {
-                Truth.assertThat(it.bookLists).hasSize(listBookLists.size)
-                Truth.assertThat(it.bookLists[0].books).hasSize(2)
-                Truth.assertThat(it.bookLists[1].books).isEmpty()
-                Truth.assertThat(it.bookLists[2].books).isEmpty()
+                Truth.assertThat(it.book.author).isEqualTo(bookDetails.author)
             }
-            turbine.awaitItem().let {
-                Truth.assertThat(it.bookLists[0].books).hasSize(2)
-                Truth.assertThat(it.bookLists[1].books).hasSize(1)
-                Truth.assertThat(it.bookLists[2].books).isEmpty()
-            }
-            turbine.awaitItem().let {
-                Truth.assertThat(it.bookLists[0].books).hasSize(2)
-                Truth.assertThat(it.bookLists[1].books).hasSize(1)
-                Truth.assertThat(it.bookLists[2].books).hasSize(1)
-            }
+
             turbine.awaitItem().let {
                 Truth.assertThat(it.isLoading).isFalse()
             }
@@ -76,10 +72,10 @@ class BookListsViewModelTest {
     }
 
     @Test
-    fun `fetching book lists should handle network errors`() = runTest {
+    fun `fetchBookDetails should handle network errors`() = runTest {
         turbineScope {
             val unknownHostException = UnknownHostException()
-            coEvery { repository.getBookLists(any()) } throws unknownHostException
+            coEvery { repository.getBookDetails(viewModel.uiState.value.book.id, any()) } throws unknownHostException
 
             val stateTurbine = viewModel.uiState.testIn(backgroundScope)
             val errorTurbine = viewModel.errorStream.testIn(backgroundScope)
@@ -93,7 +89,7 @@ class BookListsViewModelTest {
                 Truth.assertThat(it.isLoading).isTrue()
             }
             stateTurbine.awaitItem().let {
-                Truth.assertThat(it.bookLists).isEmpty()
+                Truth.assertThat(it.book.author).isNull()
                 Truth.assertThat(it.isLoading).isFalse()
             }
             errorTurbine.awaitItem().let {

@@ -33,6 +33,7 @@
                     android:adjustViewBounds="true"
                     android:contentDescription="@string/content_description_book_item_image"
                     android:scaleType="center"
+                    tools:layout_height="300dp"
                     app:layout_constrainedWidth="true"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "com.lukasstancikas.senukaitest"
     compileSdk = 34
+    buildToolsVersion = "34.0.0"
 
     defaultConfig {
         applicationId = "com.lukasstancikas.senukaitest"
@@ -33,7 +34,6 @@ android {
     buildFeatures {
         viewBinding = true
     }
-    buildToolsVersion = "34.0.0"
 }
 
 dependencies {
@@ -54,13 +54,4 @@ dependencies {
     implementation(libs.logging.interceptor)
     // dependency injection
     implementation(libs.koin.android)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.googleTruth)
-    testImplementation(libs.androidx.arch.core)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.mockk)
-    testImplementation(libs.turbine)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

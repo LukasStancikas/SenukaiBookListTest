@@ -15,11 +15,8 @@ class MainApplication : Application() {
         super.onCreate()
 
         startKoin {
-            // Log Koin into Android logger
             androidLogger()
-            // Reference Android context
             androidContext(this@MainApplication)
-            // Load modules
             modules(listOf(
                 BookDatabaseModule.get(),
                 NetworkModule.get(),

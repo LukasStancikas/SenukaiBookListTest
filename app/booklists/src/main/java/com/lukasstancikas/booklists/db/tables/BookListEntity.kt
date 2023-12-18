@@ -14,7 +14,6 @@ data class BookListEntity(
         id,
         title,
     )
-
     companion object {
         fun BookList.toBookListEntity() =
             BookListEntity(

@@ -1,4 +1,4 @@
-package com.lukasstancikas.booklists.ui
+package com.lukasstancikas.booklists
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

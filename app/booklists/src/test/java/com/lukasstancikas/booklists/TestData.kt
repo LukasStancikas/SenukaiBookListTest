@@ -1,4 +1,4 @@
-package com.lukasstancikas.booklists.ui.bookdetails
+package com.lukasstancikas.booklists
 
 import com.lukasstancikas.booklists.data.Book
 import com.lukasstancikas.booklists.data.BookList
